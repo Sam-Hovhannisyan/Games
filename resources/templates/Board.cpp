@@ -8,26 +8,24 @@ namespace Board
     Board<T>::Board(const size_type rows, const size_type cols)
         : rows_(rows)
         , cols_(cols)
-    {
-        board_.resize(rows_, std::vector<T>(cols_, T()));
-    }
+        , board_(rows, std::vector<T>(cols, T()))
+    {}
 
     template <typename T>
     Board<T>::Board(const Board& rhv)
-        : rows_(rhv.getRows())
-        , cols_(rhv.getCols())
-    {
-        board_ = rhv.getBoard();
-    }
+        : rows_(rhv.rows_)
+        , cols_(rhv.cols_)
+        , board_(rhv.board_) 
+    {}
 
     template <typename T>
     const Board<T>&
     Board<T>::operator=(const Board& rhv)
     {
         if (this != &rhv) {
-            setRows(rhv.getRows());
-            setCols(rhv.getCols());
-            board_ = rhv.getBoard();
+            rows_ = rhv.rows_;
+            cols_ = rhv.cols_;
+            board_ = rhv.board_;
         }
         return *this;
     }
