@@ -2,7 +2,7 @@
 #ifndef __BOARD_HPP__ 
 #define __BOARD_HPP__ 
 
-#include "headers/Coordinate.hpp"
+#include "../headers/Coordinate.hpp"
 
 #include <iostream>
 #include <vector>
@@ -84,6 +84,6 @@ namespace Board
 }
 }
 
-#include "templates/Board.cpp"
+#include "../templates/Board.cpp"
 
 #endif // __BOARD_HPP__

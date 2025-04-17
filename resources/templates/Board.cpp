@@ -1,4 +1,7 @@
-#include "headers/Board.hpp"
+#ifndef __BOARD_CPP__
+#define __BOARD_CPP__
+
+#include "../headers/Board.hpp"
 
 namespace SamHovhannisyan
 {
@@ -93,3 +96,5 @@ namespace Board
     }
 }
 }
+
+#endif // __BOARD_CPP__
