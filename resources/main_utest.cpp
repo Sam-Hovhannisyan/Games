@@ -1,4 +1,4 @@
-#include "headers/board.hpp"
+#include "headers/Board.hpp"
 #include <gtest/gtest.h>
 
 TEST(BoardTest, DefaultConstructor)
