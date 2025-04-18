@@ -9,7 +9,7 @@ namespace SnakeGame
         : board_(width, height)
         , direction_(RIGHT)
         , level_(1)
-        , speed_(150000)
+        , speed_(200000)
         , game_over_(false)
     {
         std::srand(std::time(0));
@@ -22,7 +22,6 @@ namespace SnakeGame
     void 
     Game::start() 
     {
-        std::srand(time(nullptr));
         initscr();
         noecho();
         cbreak();
@@ -40,6 +39,7 @@ namespace SnakeGame
         }
 
         renderGameOver();
+        sleep(3);
         endwin();
     }
 
@@ -49,21 +49,26 @@ namespace SnakeGame
         clear();
         
         // Draw game area with border offset
-        for (size_t y = 0; y < board_.getRows(); ++y) {
-            for (size_t x = 0; x < board_.getCols(); ++x) {
+        for (size_t y = 0; y < board_.getRows(); ++y) 
+        {
+            for (size_t x = 0; x < board_.getCols(); ++x) 
+            {
                 Coordinate::Coordinate pos(x, y);
                 int displayChar = '.';
                 int colorPair = 0;
                 
-                if (pos == snakeHead_) {
+                if (pos == snakeHead_) 
+                {
                     displayChar = '@';
                     colorPair = 1;
                 }
-                else if (std::find(snakeBody_.begin(), snakeBody_.end(), pos) != snakeBody_.end()) {
+                else if (std::find(snakeBody_.begin(), snakeBody_.end(), pos) != snakeBody_.end()) 
+                {
                     displayChar = 'O';
                     colorPair = 1;
                 }
-                else if (pos == fruit_.coordinate) {
+                else if (pos == fruit_.coordinate) 
+                {
                     displayChar = '*';
                     colorPair = 2;
                 }
@@ -74,11 +79,13 @@ namespace SnakeGame
         
         // Draw border
         attron(COLOR_PAIR(3));
-        for (size_t x = 0; x < board_.getCols() + 2; x++) {
+        for (size_t x = 0; x < board_.getCols() + 2; x++) 
+        {
             mvaddch(0, x, '#');
             mvaddch(board_.getRows() + 1, x, '#');
         }
-        for (size_t y = 0; y < board_.getRows() + 2; y++) {
+        for (size_t y = 0; y < board_.getRows() + 2; y++) 
+        {
             mvaddch(y, 0, '#');
             mvaddch(y, board_.getCols() + 1, '#');
         }
@@ -174,20 +181,24 @@ namespace SnakeGame
         std::vector<Coordinate::Coordinate> emptySpots;
     
         // Find all empty spots on the board
-        for (size_t y = 0; y < board_.getRows(); ++y) {
-            for (size_t x = 0; x < board_.getCols(); ++x) {
+        for (size_t y = 0; y < board_.getRows(); ++y) 
+        {
+            for (size_t x = 0; x < board_.getCols(); ++x) 
+            {
                 Coordinate::Coordinate pos(x, y);
                 
                 // Check if position is not occupied by snake
                 if (pos != snakeHead_ && 
-                    std::find(snakeBody_.begin(), snakeBody_.end(), pos) == snakeBody_.end()) {
+                    std::find(snakeBody_.begin(), snakeBody_.end(), pos) == snakeBody_.end()) 
+                {
                     emptySpots.push_back(pos);
                 }
             }
         }
         
         // If no empty spots left, end game
-        if (emptySpots.empty()) {
+        if (emptySpots.empty()) 
+        {
             game_over_ = true;
             return;
         }
@@ -214,10 +225,7 @@ namespace SnakeGame
     Game::renderGameOver() const
     {
         clear();
-        mvprintw(board_.getRows() / 2 - 1, board_.getCols() / 2 - 10, "GAME OVER");
-        mvprintw(board_.getRows() / 2 + 1, board_.getCols() / 2 - 15, "Score: %zu", snakeBody_.size());
-        mvprintw(board_.getRows() / 2 + 3, board_.getCols() / 2 - 15, "Fruits: %zu", Fruit::Fruit::FRUIT_COUNT);
-        mvprintw(board_.getRows() / 2 + 5, board_.getCols() / 2 - 12, "Press any key");
+        mvprintw(0, 2, "Game Over. Your score: %zu", snakeBody_.size());
         refresh();
         getch();
     }
