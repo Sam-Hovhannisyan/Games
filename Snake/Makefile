@@ -13,7 +13,7 @@ endif
 debug:   CXXFLAGS+=-g3
 release: CXXFLAGS+=-g0 -DNDEBUG
 
-SOURCES=main.cpp templates/Game.cpp ../resources/templates/Board.cpp
+SOURCES=main.cpp sources/Game.cpp ../resources/templates/Board.cpp
 DEPENDS=$(patsubst %.cpp,$(BUILD_DIR)/%.d,$(SOURCES))
 OBJS=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
 
@@ -30,8 +30,8 @@ $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $@
-	mkdir -p $(BUILD_DIR)/templates
-	mkdir -p $(BUILD_DIR)/../resources/templates
+	mkdir -p $(BUILD_DIR)/sources
+	mkdir -p $(BUILD_DIR)/../resources/sources
 
 clean:
 	rm -rf $(BUILDS)
