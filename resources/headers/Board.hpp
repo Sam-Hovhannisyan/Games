@@ -24,7 +24,6 @@ namespace Board
     ///          coordinates. It also provides a constructor, copy constructor, and assignment operator.
     /// @class Board
     /// @tparam T The type of the elements in the board
-    /// @param rhv The right-hand value for copy constructor and assignment operator
     /// @param size_type The size type for the board
     /// @param board_ The 2D vector representing the board
     /// @param rows_ The number of rows in the board
