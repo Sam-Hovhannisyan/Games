@@ -13,6 +13,8 @@ namespace MinesweeperGame
     class Game
     {
     public:
+        typedef Coordinate::Coordinate Coordinate;
+    public:
         Game(const size_t width = 16, const size_t height = 16);
         void start();
     
@@ -34,20 +36,20 @@ namespace MinesweeperGame
     
     private:
         void drawBoard() const;
-        void generateMines();
+        void generateMines(const Coordinate& coord);
         void placeBomb(const size_t pos);
-        void handleInput();
+        void placeRemoveFlag(const Coordinate& coord);
+        const Coordinate handleInput();
         void checkCollision();
         bool checkWin() const;
-        void openEmptysFrom(const Coordinate::Coordinate& coord);
-        void openCell(const Coordinate::Coordinate& coord);
-        // void ensureSafeFirstClick(const Coordinate::Coordinate& coord);
-        // void updateAdjacentNumbers(const Coordinate::Coordinate& coord);
+        void openEmptysFrom(const Coordinate& coord);
+        void openCell(const Coordinate& coord);
+        // void updateAdjacentNumbers(const Coordinate& coord);
         void revealAllMines();
 
     private:
         Board::Board<std::pair<BoardElements, bool>> board_;
-        // bool first_click_;
+        bool first_click_;
         bool game_over_;
         size_t mines_count_;
         size_t flags_placed_;

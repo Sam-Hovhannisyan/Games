@@ -4,6 +4,7 @@
 #include <numeric>
 #include <ncurses.h>
 #include <queue>
+#include <unordered_set>
 
 namespace SamHovhannisyan::MinesweeperGame
 {
@@ -13,7 +14,7 @@ namespace SamHovhannisyan::MinesweeperGame
 
     Game::Game(const size_t width, const size_t height)
         : board_(width, height)
-        // , first_click_(true)
+        , first_click_(true)
         , game_over_(false)
         , mines_count_(0)
         , flags_placed_(0)
@@ -32,7 +33,7 @@ namespace SamHovhannisyan::MinesweeperGame
         {
             for (size_t x = 0; x < board_.getCols(); ++x) 
             {
-                board_({y, x}) = {BoardElements::EMPTY, false};
+                board_({x, y}) = {BoardElements::EMPTY, false};
             }
         }
     }
@@ -63,7 +64,7 @@ namespace SamHovhannisyan::MinesweeperGame
 
             for (size_t x = 0; x < board_.getCols(); ++x) 
             {
-                const auto current = board_({y, x});
+                const auto current = board_({x, y});
                 
                 // Highlight cell if mouse is over it
                 if (mouseHover && mouseX == x && mouseY == y) {
@@ -100,20 +101,53 @@ namespace SamHovhannisyan::MinesweeperGame
     }
     
     void 
-    Game::generateMines()
+    Game::generateMines(const Coordinate& coord)
     {
+        if (coord == Coordinate(board_.getCols(), board_.getRows())) { return; }
+        first_click_ = false;
+
         const size_t area = board_.getCols() * board_.getRows();
         mines_count_ = area * 17 / 100; 
         if (mines_count_ < 1) { mines_count_ = 1; }  
         
         std::vector<size_t> positions(area);
         std::iota(positions.begin(), positions.end(), 0);
+
+        std::unordered_set<size_t> exclude_positions;
+    
+        // Add the clicked position
+        exclude_positions.insert(coord.y * board_.getCols() + coord.x);
+
+        // Add all 8 neighboring positions
+        for (int dy = -2; dy <= 2; ++dy) 
+        {
+            for (int dx = -2; dx <= 2; ++dx) 
+            {
+                if (dx == 0 && dy == 0)  { continue; }
+                
+                int ny = coord.y + dy;
+                int nx = coord.x + dx;
+                
+                if (ny >= 0 && ny < static_cast<int>(board_.getRows()) && 
+                    nx >= 0 && nx < static_cast<int>(board_.getCols())) 
+                {
+                    exclude_positions.insert(ny * board_.getCols() + nx);
+                }
+            }
+        }
+
+        // Remove excluded positions from the possible mine positions
+        positions.erase(
+            std::remove_if(positions.begin(), positions.end(),
+                [&exclude_positions](size_t pos) {
+                    return exclude_positions.find(pos) != exclude_positions.end();
+                }),
+            positions.end()
+        ); 
+
         std::shuffle(positions.begin(), positions.end(), std::mt19937(std::random_device()()));
         
-        for (size_t i = 0; i < mines_count_; ++i)
-        {
-            placeBomb(positions[i]);
-        }
+        for (size_t i = 0; i < mines_count_; ++i) { placeBomb(positions[i]); }
     }
 
     void 
@@ -121,7 +155,7 @@ namespace SamHovhannisyan::MinesweeperGame
     {
         const size_t x = pos % board_.getCols();
         const size_t y = pos / board_.getCols();
-        board_({y, x}) = {BoardElements::MINE, false};
+        board_({x, y}) = {BoardElements::MINE, false};
         
         for (int dy = -1; dy <= 1; ++dy) 
         {
@@ -134,7 +168,7 @@ namespace SamHovhannisyan::MinesweeperGame
                 
                 if (nx < board_.getCols() && ny < board_.getRows()) 
                 {
-                    auto& cell = board_({ny, nx});
+                    auto& cell = board_({nx, ny});
                     if (cell.first != BoardElements::MINE) 
                     {
                         cell.first = BoardElements{int(cell.first) + 1};
@@ -145,7 +179,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::openCell(const Coordinate::Coordinate& coord)
+    Game::openCell(const Coordinate& coord)
     {
         auto& cell = board_(coord);
         if (cell.first == BoardElements::FLAG) { return; }
@@ -164,108 +198,142 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::openEmptysFrom(const Coordinate::Coordinate& coord)
+    Game::openEmptysFrom(const Coordinate& start)
     {
-        std::queue<Coordinate::Coordinate> toProcess;
-        toProcess.push(coord);
+        const size_t rows = board_.getRows();
+        const size_t cols = board_.getCols();
 
-        while (!toProcess.empty())
+        std::queue<Coordinate> queue;
+        queue.push(start);
+
+        std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
+
+        while (!queue.empty())
         {
-            auto current = toProcess.front();
-            toProcess.pop();
+            Coordinate current = queue.front();
+            queue.pop();
 
-            // Boundary check
-            if (current.y >= board_.getRows() || current.x >= board_.getCols()) { continue; }
+            size_t x = current.x;
+            size_t y = current.y;
 
-            auto& cell = board_(current);
-            
-            // Skip if already revealed or flagged
-            if (cell.second || cell.first == BoardElements::FLAG) { continue; }
+            if (x >= cols || y >= rows || visited[y][x])
+                continue;
 
-            // Reveal the cell
+            visited[y][x] = true;
+            auto& cell = board_({x, y});
+
+            // Skip flagged and already-opened cells
+            if (cell.second || cell.first == BoardElements::FLAG)
+                continue;
+
+            // Open the cell
             cell.second = true;
 
-            // Stop if this is a numbered cell
-            if (cell.first != BoardElements::EMPTY) { continue; }
-
-            // Process all 8 neighbors
-            for (int dy = -1; dy <= 1; ++dy) 
+            if (cell.first == BoardElements::EMPTY)
             {
-                for (int dx = -1; dx <= 1; ++dx) 
+                // If empty, expand to neighbors
+                for (int dy = -1; dy <= 1; ++dy)
                 {
-                    if (dx == 0 && dy == 0) { continue; }
-                    if (int(current.x) + dx < 0 || int(current.y) + dy < 0) { continue; }
-                    size_t nx = current.x + dx;
-                    size_t ny = current.y + dy;
-                    
-                    if (nx < board_.getCols() && ny < board_.getRows() && board_({ny, nx}).first != BoardElements::MINE) 
+                    for (int dx = -1; dx <= 1; ++dx)
                     {
-                        toProcess.push({ny, nx});
+                        if (dy == 0 && dx == 0)
+                            continue;
+
+                        int nx = static_cast<int>(x) + dx;
+                        int ny = static_cast<int>(y) + dy;
+
+                        if (nx >= 0 && ny >= 0 && nx < static_cast<int>(cols) && ny < static_cast<int>(rows))
+                        {
+                            queue.push(Coordinate{static_cast<size_t>(nx), static_cast<size_t>(ny)});
+                        }
                     }
                 }
             }
         }
     }
 
-    void 
+    const 
+    typename Game::Coordinate
     Game::handleInput()
     {
         MEVENT event;
         int ch = getch();
         
-        switch (ch) {
-            case 'q': game_over_ = true; break;                
-            case KEY_MOUSE:
-                if (getmouse(&event) == OK) {
-                    mouseHover = false;
-                    
-                    // Convert screen coordinates to board coordinates
-                    const int boardStartX = 3;
-                    const int boardStartY = 3; 
-                    const int cellWidth = 3; 
-                    
-                    // Check if mouse is within board bounds
-                    if (event.y >= boardStartY && event.x >= boardStartX) 
+        switch (ch) 
+        {
+        case 'q': game_over_ = true; return Coordinate(board_.getCols(), board_.getRows());                
+        case KEY_MOUSE:
+            if (getmouse(&event) == OK) {
+                mouseHover = false;
+                
+                // Convert screen coordinates to board coordinates
+                const int boardStartX = 3;
+                const int boardStartY = 3; 
+                const int cellWidth = 3; 
+                
+                // Check if mouse is within board bounds
+                if (event.y >= boardStartY && event.x >= boardStartX) 
+                {
+                    size_t potentialX = (event.x - boardStartX) / cellWidth;
+                    size_t potentialY = event.y - boardStartY;
+                
+                    // Validate coordinates
+                    if (potentialX < board_.getCols() && 
+                        potentialY < board_.getRows()) 
                     {
-                        size_t potentialX = (event.x - boardStartX) / cellWidth;
-                        size_t potentialY = event.y - boardStartY;
-                    
-                        // Validate coordinates
-                        if (potentialX < board_.getCols() && 
-                            potentialY < board_.getRows()) 
+                        mouseX = potentialX;
+                        mouseY = potentialY;
+                        mouseHover = true;
+                        
+                        if (event.bstate & BUTTON1_CLICKED) { return Coordinate(mouseX, mouseY); }
+                        else if (event.bstate & BUTTON3_CLICKED && !first_click_) 
                         {
-                            mouseX = potentialX;
-                            mouseY = potentialY;
-                            mouseHover = true;
-                            
-                            if (event.bstate & BUTTON1_CLICKED) { openCell({mouseY, mouseX}); }
-                            else if (event.bstate & BUTTON3_CLICKED) 
-                            {
-                                auto& cell = board_({mouseY, mouseX});
-                                if (!cell.second && cell.first != BoardElements::FLAG) {
-                                    cell.first = BoardElements::FLAG;
-                                    flags_placed_++;
-                                } else if (cell.first == BoardElements::FLAG) {
-                                    cell.first = BoardElements::EMPTY;
-                                    flags_placed_--;
-                                }
-                            }
+                            placeRemoveFlag({mouseX, mouseY});
                         }
                     }
                 }
-                break;
+            }
+        }
+
+        return Coordinate(board_.getCols(), board_.getRows());
+    }
+
+    void
+    Game::placeRemoveFlag(const Coordinate& coord)
+    {
+        auto& cell = board_({coord.x, coord.y});
+        if (!cell.second && cell.first != BoardElements::FLAG) 
+        {
+            cell.first = BoardElements::FLAG;
+            flags_placed_++;
+        }
+        else if (cell.first == BoardElements::FLAG) 
+        {
+            cell.first = BoardElements::EMPTY;
+            flags_placed_--;
         }
     }
 
     void 
     Game::start()
     {
-        generateMines();
-        
-        while (!game_over_) {
+        while (!game_over_) 
+        {
             drawBoard();
-            handleInput();
-            if (checkWin()) { break; }
+            Coordinate coord = handleInput();
+            
+            // Check for quit
+            if (coord == Coordinate(board_.getCols(), board_.getRows())) { continue; }
+            
+            if (first_click_) 
+            {
+                generateMines(coord);
+                openCell(coord);  // Open the first clicked cell
+                first_click_ = false;
+            } 
+            else { openCell(coord); }
+            
+            if (checkWin()) { game_over_ = true; }
         }
             
         // Game over screen
@@ -288,7 +356,7 @@ namespace SamHovhannisyan::MinesweeperGame
         {
             for (size_t x = 0; x < board_.getCols(); ++x) 
             {
-                const auto& cell = board_({y, x});
+                const auto& cell = board_({x, y});
                 if (cell.first != MINE && !cell.second) { return false; }
             }
         }
@@ -303,9 +371,9 @@ namespace SamHovhannisyan::MinesweeperGame
         {
             for (size_t x = 0; x < board_.getCols(); ++x) 
             {
-                if (board_({y, x}).first == BoardElements::MINE) 
+                if (board_({x, y}).first == BoardElements::MINE) 
                 {
-                    board_({y, x}).second = true;
+                    board_({x, y}).second = true;
                 }
             }
         }
