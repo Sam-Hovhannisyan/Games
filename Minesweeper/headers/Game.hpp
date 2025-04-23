@@ -39,16 +39,17 @@ namespace MinesweeperGame
         void generateMines(const Coordinate& coord);
         void placeBomb(const size_t pos);
         void placeRemoveFlag(const Coordinate& coord);
+        std::vector<SamHovhannisyan::MinesweeperGame::Game::Coordinate>::const_iterator getFlag(const Coordinate& coord) const;
         const Coordinate handleInput();
         void checkCollision();
         bool checkWin() const;
         void openEmptysFrom(const Coordinate& coord);
         void openCell(const Coordinate& coord);
-        // void updateAdjacentNumbers(const Coordinate& coord);
         void revealAllMines();
 
     private:
         Board::Board<std::pair<BoardElements, bool>> board_;
+        std::vector<Coordinate> flags_;
         bool first_click_;
         bool game_over_;
         size_t mines_count_;

@@ -71,6 +71,13 @@ namespace SamHovhannisyan::MinesweeperGame
                     attron(A_REVERSE);
                 }
 
+                if (getFlag({x, y}) != flags_.end()) 
+                {
+                    printw("[F]");
+                    if (mouseX == x && mouseY == y) { attroff(A_REVERSE); }
+                    continue;
+                }
+
                 switch (current.first)
                 {
                 case EMPTY:  printw(current.second ? "   " : "[ ]"); break;
@@ -83,7 +90,6 @@ namespace SamHovhannisyan::MinesweeperGame
                 case SEVEN:  printw(current.second ? "[7]" : "[ ]"); break;
                 case EIGHT:  printw(current.second ? "[8]" : "[ ]"); break;
                 case MINE:   printw(current.second ? "[*]" : "[ ]"); break;
-                case FLAG:   printw("[F]"); break;
                 default:     printw("[?]"); break;
                 }
 
@@ -109,6 +115,7 @@ namespace SamHovhannisyan::MinesweeperGame
         const size_t area = board_.getCols() * board_.getRows();
         mines_count_ = area * 17 / 100; 
         if (mines_count_ < 1) { mines_count_ = 1; }  
+        flags_.reserve(mines_count_);
         
         std::vector<size_t> positions(area);
         std::iota(positions.begin(), positions.end(), 0);
@@ -182,7 +189,7 @@ namespace SamHovhannisyan::MinesweeperGame
     Game::openCell(const Coordinate& coord)
     {
         auto& cell = board_(coord);
-        if (cell.first == BoardElements::FLAG) { return; }
+        if (getFlag(coord) != flags_.end()) { return; }
         
         cell.second = true;
         
@@ -198,62 +205,41 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::openEmptysFrom(const Coordinate& start)
+    Game::openEmptysFrom(const Coordinate& coord)
     {
-        const size_t rows = board_.getRows();
-        const size_t cols = board_.getCols();
-
-        std::queue<Coordinate> queue;
-        queue.push(start);
-
-        std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
-
-        while (!queue.empty())
+        std::queue<Coordinate> to_open;
+        to_open.push(coord);
+        
+        while (!to_open.empty()) 
         {
-            Coordinate current = queue.front();
-            queue.pop();
-
-            size_t x = current.x;
-            size_t y = current.y;
-
-            if (x >= cols || y >= rows || visited[y][x])
-                continue;
-
-            visited[y][x] = true;
-            auto& cell = board_({x, y});
-
-            // Skip flagged and already-opened cells
-            if (cell.second || cell.first == BoardElements::FLAG)
-                continue;
-
-            // Open the cell
-            cell.second = true;
-
-            if (cell.first == BoardElements::EMPTY)
+            const auto current = to_open.front();
+            to_open.pop();
+            
+            for (int dy = -1; dy <= 1; ++dy) 
             {
-                // If empty, expand to neighbors
-                for (int dy = -1; dy <= 1; ++dy)
+                for (int dx = -1; dx <= 1; ++dx) 
                 {
-                    for (int dx = -1; dx <= 1; ++dx)
+                    if (dx == 0 && dy == 0) { continue; }
+                    
+                    const size_t nx = current.x + dx;
+                    const size_t ny = current.y + dy;
+                    
+                    if (nx >= board_.getCols() || ny >= board_.getRows()) { continue; }
+                    
+                    auto& neighbor = board_({nx, ny});
+                    if (neighbor.second) { continue; }
+                    
+                    neighbor.second = true;
+                    if (neighbor.first == BoardElements::EMPTY) 
                     {
-                        if (dy == 0 && dx == 0)
-                            continue;
-
-                        int nx = static_cast<int>(x) + dx;
-                        int ny = static_cast<int>(y) + dy;
-
-                        if (nx >= 0 && ny >= 0 && nx < static_cast<int>(cols) && ny < static_cast<int>(rows))
-                        {
-                            queue.push(Coordinate{static_cast<size_t>(nx), static_cast<size_t>(ny)});
-                        }
+                        to_open.push({nx, ny});
                     }
                 }
             }
         }
     }
 
-    const 
-    typename Game::Coordinate
+    const typename Game::Coordinate
     Game::handleInput()
     {
         MEVENT event;
@@ -302,16 +288,24 @@ namespace SamHovhannisyan::MinesweeperGame
     Game::placeRemoveFlag(const Coordinate& coord)
     {
         auto& cell = board_({coord.x, coord.y});
-        if (!cell.second && cell.first != BoardElements::FLAG) 
+        const auto& flag = getFlag(coord);
+        if (cell.second) { return; }
+        if (!cell.second && flag == flags_.end()) 
         {
-            cell.first = BoardElements::FLAG;
-            flags_placed_++;
+            flags_.push_back(coord);
+            ++flags_placed_;
         }
-        else if (cell.first == BoardElements::FLAG) 
+        else if (flag != flags_.end()) 
         {
-            cell.first = BoardElements::EMPTY;
-            flags_placed_--;
+            flags_.erase(flag);
+            --flags_placed_;
         }
+    }
+
+    std::vector<SamHovhannisyan::MinesweeperGame::Game::Coordinate>::const_iterator
+    Game::getFlag(const Coordinate& coord) const
+    {
+        return std::find(flags_.begin(), flags_.end(), coord);
     }
 
     void 
