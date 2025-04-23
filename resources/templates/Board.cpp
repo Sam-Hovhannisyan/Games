@@ -72,27 +72,27 @@ namespace Board
     T&
     Board<T>::operator()(const coordinate& coord)
     {
-        assert(coord.x < getRows());
-        assert(coord.y < getCols());
-        return board_[coord.x][coord.y];
+        assert(coord.y < getRows());
+        assert(coord.x < getCols());
+        return board_[coord.y][coord.x];
     }
 
     template <typename T>
     const T&
     Board<T>::operator()(const coordinate& coord) const
     {
-        assert(coord.x < getRows());
-        assert(coord.y < getCols());
-        return board_[coord.x][coord.y];
+        assert(coord.y < getRows());
+        assert(coord.x < getCols());
+        return board_[coord.y][coord.x];
     }
 
     template <typename T>
     void 
     Board<T>::setValue(const coordinate& coord, const T& value)
     {
-        assert(coord.x < getRows());
-        assert(coord.y < getCols());
-        board_[coord.x][coord.y] = value;
+        assert(coord.y < getRows());
+        assert(coord.x < getCols());
+        board_[coord.y][coord.x] = value;
     }
 }
 }
