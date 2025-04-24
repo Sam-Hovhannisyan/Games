@@ -3,12 +3,10 @@
 
 #include <iostream>
 
-namespace SamHovhannisyan
-{
 /// @brief Namespace for the Coordinate class
 /// @details This namespace contains the Coordinate class which represents a 2D coordinate.
 /// @namespace Coordinate
-namespace Coordinate
+namespace SamHovhannisyan::Coordinate
 {   
     /// @brief Class representing a 2D coordinate
     /// @details This class contains two coordinate types: x and y. It also provides constructors,
@@ -43,7 +41,6 @@ namespace Coordinate
         /// @param rhv The right-hand value for inequality operator
         bool operator!=(const Coordinate& rhv) const { return !(*this == rhv); }
     };
-}
 }
 
 #endif
