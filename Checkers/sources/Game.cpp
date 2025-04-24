@@ -38,7 +38,7 @@ namespace SamHovhannisyan::Checkers
         // Game over screen
         clear();
         if (isWin()) { 
-            printw("Congratulations! %s won!\n", player_turn_ ? "Black" : "White"); 
+            printw("Congratulations! %s won!\n", !player_turn_ ? "Black" : "White"); 
         }
         else if (isDraw()) { 
             printw("Draw!\n");
@@ -54,20 +54,14 @@ namespace SamHovhannisyan::Checkers
     void
     Game::generateDefaultBoard() 
     {
-        size_t y = 0;
-        for (; y < 3; ++y) {
+
+        for (size_t y = 0; y < 3; ++y) {
             for (size_t x = (y % 2); x < 8; x += 2) {
                 board_({x, y}).value = BoardElements::WHITE;
             }
         }
 
-        for (; y < 5; ++y) {
-            for (size_t x = 0; x < 8; ++x) {
-                board_({x, y}).value = BoardElements::EMPTY;
-            }
-        }
-
-        for (; y < 8; ++y) {
+        for (size_t y = 5; y < 8; ++y) {
             for (size_t x = (y % 2); x < 8; x += 2) {
                 board_({x, y}).value = BoardElements::BLACK;
             }
@@ -206,6 +200,9 @@ namespace SamHovhannisyan::Checkers
 
         const Piece& piece  = getPiece(from);
         const Piece& target = getPiece(to);
+        
+        if (player_turn_ && piece.value == BoardElements::WHITE) { return false; }
+        if (!player_turn_ && piece.value == BoardElements::BLACK) { return false; }
 
         // Check if source has a piece and target is empty
         if (piece.value == BoardElements::EMPTY || target.value != BoardElements::EMPTY) 
@@ -386,8 +383,8 @@ namespace SamHovhannisyan::Checkers
         piece.value = BoardElements::EMPTY;
         
         // Check for promotion
-        if ((target.value == BoardElements::WHITE && to.y == 0) ||
-            (target.value == BoardElements::BLACK && to.y == board_.getRows() - 1)) {
+        if ((target.value == BoardElements::BLACK && to.y == 0) ||
+            (target.value == BoardElements::WHITE && to.y == board_.getRows() - 1)) {
             promote(to);
         }
     }
