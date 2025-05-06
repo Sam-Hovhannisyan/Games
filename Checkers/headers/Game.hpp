@@ -34,13 +34,16 @@ namespace SamHovhannisyan::Checkers
         void drawBoard() const;
         bool handleInput();
         bool movePiece(const Coordinate& from, const Coordinate& to);
+        bool movePieceMan(const Coordinate& from, const Coordinate& to);
+        bool movePieceKing(const Coordinate& from, const Coordinate& to);
         void takePiece(const Coordinate& coord);
         void changePlayer();
         void promote(const Coordinate& coord);
         Piece& getPiece(const Coordinate& coord);
         const Piece& getPiece(const Coordinate& coord) const;
         std::vector<Coordinate> getPieceCoordinates() const;
-        bool isFreePieceMissed(typename Game::Coordinate& coord) const;
+        bool isOpponentsPiece(const typename Game::Piece& piece) const;
+        bool isFreePieceAvailable(typename Game::Coordinate& coord) const;
         bool isFreePieceAround(const Coordinate& coord) const;
         bool isFreePieceAroundMan(const Coordinate& coord) const;
         bool isFreePieceAroundKing(const Coordinate& coord) const;

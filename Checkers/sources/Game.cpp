@@ -29,10 +29,10 @@ namespace SamHovhannisyan::Checkers
 
         while (!game_over_) {
             bool flag = true;
-            do {
+            while (flag) {
                 drawBoard();
                 flag = handleInput();
-            } while (flag);
+            }
             changePlayer();
             
             // Check game status after each move
@@ -249,6 +249,8 @@ namespace SamHovhannisyan::Checkers
         // Check piece type and movement rules
         switch (piece.value) 
         {
+        case BoardElements::EMPTY: return false;
+
         case BoardElements::BLACK: // Regular black piece
         
             // Capture move (dx = ±2)
@@ -279,22 +281,29 @@ namespace SamHovhannisyan::Checkers
 
         case BoardElements::BLACK_KING:  // Black king
         case BoardElements::WHITE_KING:  // White king
-            if (absDx == 1) return true; // Regular king move
+            int opponentPieceCount = 0;
             
-            // King capture move
-            if (absDx == 2) {
-                const int midX = from.x + dx / 2;
-                const int midY = from.y + dy / 2;
-                const Piece& midPiece = getPiece({static_cast<size_t>(midX), static_cast<size_t>(midY)});
-                
-                if (piece.value == BoardElements::BLACK_KING) {
-                    return (midPiece.value == BoardElements::WHITE || midPiece.value == BoardElements::WHITE_KING);
-                } else {
-                    return (midPiece.value == BoardElements::BLACK || midPiece.value == BoardElements::BLACK_KING);
+            const int dxStep = dx / absDx;
+            const int dyStep = dy / absDy;
+
+            size_t fromX = from.x;
+            size_t fromY = from.y;
+            
+            while (fromX != to.x && fromY != to.y && opponentPieceCount < 2) {
+                fromX += dxStep;
+                fromY += dyStep;
+
+                const Piece& current = getPiece({fromX, fromY}); 
+                if ((!player_turn_ && (current.value == BoardElements::WHITE || current.value == BoardElements::WHITE_KING)) ||
+                    (player_turn_  && (current.value == BoardElements::BLACK || current.value == BoardElements::BLACK_KING))) {
+                    return false;
+                }
+
+                if (isOpponentsPiece(current)) {
+                    ++opponentPieceCount;
                 }
             }
-            break;
-        default: return false;
+            return opponentPieceCount < 2;
         }
 
         return false;
@@ -316,7 +325,7 @@ namespace SamHovhannisyan::Checkers
                 
                 // Skip empty squares and opponent's pieces
                 if (piece.value == BoardElements::EMPTY || 
-                    ( player_turn_ && ((piece.value & BoardElements::WHITE) == BoardElements::WHITE)) ||
+                    (player_turn_  && ((piece.value & BoardElements::WHITE) == BoardElements::WHITE)) ||
                     (!player_turn_ && ((piece.value & BoardElements::BLACK) == BoardElements::BLACK))) 
                 { continue; }
 
@@ -392,6 +401,23 @@ namespace SamHovhannisyan::Checkers
     bool
     Game::movePiece(const Coordinate& from, const Coordinate& to)
     {
+        const Piece& piece = getPiece(from);
+        if (piece.value == BoardElements::EMPTY) { return false; }
+
+        if (piece.value == BoardElements::BLACK || piece.value == BoardElements::WHITE) {
+            return movePieceMan(from, to);
+        }
+
+        if (piece.value == BoardElements::BLACK_KING || piece.value == BoardElements::WHITE_KING) {
+            return movePieceKing(from, to);
+        }
+
+        return false;
+    }
+
+    bool
+    Game::movePieceMan(const Coordinate& from, const Coordinate& to)
+    {
         Piece& piece  = getPiece(from);
         Piece& target = getPiece(to);
 
@@ -403,10 +429,8 @@ namespace SamHovhannisyan::Checkers
         if (absDx == 1) {
             if (is_capture_available_) { return true; }
             Coordinate coord;
-            if (isFreePieceMissed(coord)) {
-                if (coord != Coordinate(board_.getCols(), board_.getRows())) {
-                    takePiece(coord);
-                }
+            if (isFreePieceAvailable(coord)) {
+                takePiece(coord);
                 target = piece;
                 piece.value = BoardElements::EMPTY;
                 return false;
@@ -434,6 +458,53 @@ namespace SamHovhannisyan::Checkers
         return is_capture_available_;
     }
 
+    bool
+    Game::movePieceKing(const Coordinate& from, const Coordinate& to)
+    {
+        Piece& piece  = getPiece(from);
+        Piece& target = getPiece(to);
+
+        // Calculate movement direction and distance
+        const int dx = static_cast<int>(to.x) - static_cast<int>(from.x);
+        const int dy = static_cast<int>(to.y) - static_cast<int>(from.y);
+        const int absDx = abs(dx);
+        const int absDy = abs(dy);
+
+        const int dxStep = dx / absDx;
+        const int dyStep = dy / absDy;
+
+        size_t fromX = from.x;
+        size_t fromY = from.y;
+
+        while (fromX != to.x && fromY != to.y) {
+            fromX += dxStep;
+            fromY += dyStep;
+
+            const Piece& current = getPiece({fromX, fromY});
+
+            if (isOpponentsPiece(current)) {
+                target = piece;
+                is_capture_available_ = isFreePieceAround(to);
+                target.value = BoardElements::EMPTY;
+                takePiece({fromX, fromY});
+                break;
+            }
+        }
+
+        Coordinate coord;
+        if (fromX == to.x && fromY == to.y && isFreePieceAvailable(coord)) {
+            takePiece(coord);
+            target = piece;
+            piece.value = BoardElements::EMPTY;
+            return false;
+        }
+        
+        target = piece;
+        piece.value = BoardElements::EMPTY;
+
+        return is_capture_available_;
+    }
+
     void
     Game::takePiece(const Coordinate& coord)
     {
@@ -451,10 +522,29 @@ namespace SamHovhannisyan::Checkers
         piece.value = BoardElements::EMPTY;
     }
 
+    bool 
+    Game::isOpponentsPiece(const typename Game::Piece& piece) const
+    {
+        if (piece.value == BoardElements::EMPTY) { return false; }
+        return (player_turn_  && (piece.value == BoardElements::WHITE || piece.value == BoardElements::WHITE_KING)) ||
+               (!player_turn_ && (piece.value == BoardElements::BLACK || piece.value == BoardElements::BLACK_KING));
+    }
+
     bool
     Game::isFreePieceAround(const Coordinate& coord) const
     {
-        return isFreePieceAroundMan(coord) || isFreePieceAroundKing(coord);
+        const Piece& piece = getPiece(coord);
+        if (piece.value == BoardElements::EMPTY) { return false; }
+
+        if (piece.value == BoardElements::BLACK || piece.value == BoardElements::WHITE) {
+            return isFreePieceAroundMan(coord);
+        }
+
+        if (piece.value == BoardElements::BLACK_KING || piece.value == BoardElements::WHITE_KING) {
+            return isFreePieceAroundKing(coord);
+        }
+
+        return false;
     }
 
     bool
@@ -512,51 +602,42 @@ namespace SamHovhannisyan::Checkers
     {
         const Piece& piece = getPiece(coord);
         if (piece.value == BoardElements::EMPTY) { return false; }
-        Coordinate newCoord = coord;
-        if (piece.value == BoardElements::WHITE_KING) {
-            while (newCoord.x < board_.getCols() && newCoord.y < board_.getRows()) {
-                if (getPiece(newCoord).value == BoardElements::BLACK) {
-                    if (getPiece({newCoord.x + 1, newCoord.y + 1}).value == BoardElements::EMPTY) { return true; }
-                    break;
+
+        const std::vector<std::pair<int, int>> directions = {
+            {1, 1},   // Down-right
+            {1, -1},  // Up-right
+            {-1, 1},  // Down-left
+            {-1, -1}  // Up-left
+        };
+
+        for (const auto& direction : directions) {
+            Coordinate newCoord = coord;
+
+            while (true) {
+                newCoord.x += direction.first;
+                newCoord.y += direction.second;
+
+                // Check if the new coordinate is out of bounds
+                if (newCoord.x >= board_.getCols() || newCoord.y >= board_.getRows()) 
+                { break; }
+
+                const Piece& current = getPiece(newCoord);
+                if (isOpponentsPiece(current)) {
+                    Coordinate nextCoord = {newCoord.x + direction.first, newCoord.y + direction.second};
+                    if (nextCoord.x < board_.getCols() && nextCoord.y < board_.getRows() &&
+                        getPiece(nextCoord).value == BoardElements::EMPTY) 
+                    { return true; }
+                } else if (current.value != BoardElements::EMPTY) {
+                    break; // Stop if a non-empty piece blocks the path
                 }
-                newCoord.x++;
-                newCoord.y++;
-            }
-            newCoord = coord;
-            while (newCoord.x > 0 && newCoord.y < board_.getRows()) {
-                if (getPiece(newCoord).value == BoardElements::BLACK) {
-                    if (getPiece({newCoord.x - 1, newCoord.y + 1}).value == BoardElements::EMPTY) { return true; }
-                    break;
-                }
-                newCoord.x--;
-                newCoord.y++;
-            }
-            newCoord = coord;
-        }
-        if (piece.value == BoardElements::BLACK_KING) {
-            while (newCoord.x < board_.getCols() && newCoord.y > 0) {
-                if (getPiece(newCoord).value == BoardElements::WHITE) {
-                    if (getPiece({newCoord.x + 1, newCoord.y - 1}).value == BoardElements::EMPTY) { return true; }
-                    break;
-                }
-                newCoord.x++;
-                newCoord.y--;
-            }
-            newCoord = coord;
-            while (newCoord.x > 0 && newCoord.y > 0) {
-                if (getPiece(newCoord).value == BoardElements::WHITE) {
-                    if (getPiece({newCoord.x - 1, newCoord.y - 1}).value == BoardElements::EMPTY) { return true; }
-                    break;
-                }
-                newCoord.x--;
-                newCoord.y--;
             }
         }
+        
         return false;
     }
 
     bool
-    Game::isFreePieceMissed(typename Game::Coordinate& coord) const
+    Game::isFreePieceAvailable(typename Game::Coordinate& coord) const
     {
         std::vector<Coordinate> coordinates = getPieceCoordinates();
         for (size_t i = 0; i < coordinates.size(); ++i) {
