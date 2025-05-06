@@ -11,7 +11,7 @@ namespace SamHovhannisyan::Checkers
         , player_turn_(true)
         , is_capture_available_(false)
         , board_(8, 8)
-        , players_pieces_({12, 12})
+        , players_pieces_({2, 1})
     {}
 
     void
@@ -58,15 +58,17 @@ namespace SamHovhannisyan::Checkers
     void
     Game::generateDefaultBoard() 
     {
-        for (size_t i = 0; i < 8; i += 2) {
-            board_({i, 2}).value = BoardElements::WHITE;
+        
+        for (size_t i = 0; i < 2; i += 2) {
+            board_({i, 2}).value = BoardElements::WHITE_KING;
         }
 
-        for (size_t i = 1; i < 8; i += 2) {
+        for (size_t i = 1; i < 4; i += 2) {
             board_({i, 5}).value = BoardElements::BLACK;
         }
-
+        board_({1, 5}).value = BoardElements::BLACK_KING;
         /*
+        
         for (size_t y = 0; y < 3; ++y) {
             for (size_t x = (y % 2); x < 8; x += 2) {
                 board_({x, y}).value = BoardElements::WHITE;
@@ -186,7 +188,11 @@ namespace SamHovhannisyan::Checkers
         Piece& piece = getPiece(coord);
         if (piece.value == BoardElements::EMPTY) { return; }
         if (int(piece.value) > 2) { return; }
-        piece.value = BoardElements(int(piece.value) + 2);
+        if ((player_turn_  && coord.y == 0) ||
+            (!player_turn_ && coord.y == board_.getRows() - 1)) 
+        {
+            piece.value = BoardElements(int(piece.value) + 2);
+        }
     }
 
     typename Game::Piece&
@@ -433,6 +439,7 @@ namespace SamHovhannisyan::Checkers
                 takePiece(coord);
                 target = piece;
                 piece.value = BoardElements::EMPTY;
+                promote(to);
                 return false;
             }
         }
@@ -450,11 +457,7 @@ namespace SamHovhannisyan::Checkers
         target = piece;
         piece.value = BoardElements::EMPTY;
         
-        // Check for promotion
-        if ((target.value == BoardElements::BLACK && to.y == 0) ||
-            (target.value == BoardElements::WHITE && to.y == board_.getRows() - 1)) {
-            promote(to);
-        }
+        promote(to);
         return is_capture_available_;
     }
 
@@ -483,10 +486,10 @@ namespace SamHovhannisyan::Checkers
             const Piece& current = getPiece({fromX, fromY});
 
             if (isOpponentsPiece(current)) {
+                takePiece({fromX, fromY});
                 target = piece;
                 is_capture_available_ = isFreePieceAround(to);
                 target.value = BoardElements::EMPTY;
-                takePiece({fromX, fromY});
                 break;
             }
         }
