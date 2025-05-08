@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-namespace SamHovhannisyan::Checkers
+namespace SamHovhannisyan::CheckersGame
 {
-    class Game
+    class Checkers
     {
     private:
         enum BoardElements : int
@@ -25,7 +25,7 @@ namespace SamHovhannisyan::Checkers
         typedef Coordinate::Coordinate Coordinate;
 
     public:
-        Game();
+        Checkers();
         void start();
     
     private:

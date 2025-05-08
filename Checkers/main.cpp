@@ -3,7 +3,7 @@
 int
 main()
 {
-    SamHovhannisyan::Checkers::Game game;
+    SamHovhannisyan::CheckersGame::Checkers game;
     game.start();
 
     return 0;

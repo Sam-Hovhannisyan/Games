@@ -4,9 +4,9 @@
 #include <cassert>
 #include <ncursesw/ncurses.h>
 
-namespace SamHovhannisyan::Checkers
+namespace SamHovhannisyan::CheckersGame
 {
-    Game::Game()
+    Checkers::Checkers()
         : game_over_(false)
         , player_turn_(true)
         , is_capture_available_(false)
@@ -15,7 +15,7 @@ namespace SamHovhannisyan::Checkers
     {}
 
     void
-    Game::start() 
+    Checkers::start() 
     {
         setlocale(LC_ALL, "");
         // Initialize ncurses
@@ -39,7 +39,7 @@ namespace SamHovhannisyan::Checkers
             game_over_ = isWin() || isDraw();
         }
 
-        // Game over screen
+        // Checkers over screen
         clear();
         if (isWin()) { 
             printw("Congratulations! %s won!\n", !player_turn_ ? "Black" : "White"); 
@@ -56,7 +56,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     void
-    Game::generateDefaultBoard() 
+    Checkers::generateDefaultBoard() 
     {
         for (size_t y = 0; y < 3; ++y) {
             for (size_t x = ((y + 1) % 2); x < board_.getCols(); x += 2) {
@@ -72,7 +72,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     void
-    Game::drawBoard() const
+    Checkers::drawBoard() const
     {
         // Clear the screen
         clear(); 
@@ -128,7 +128,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::handleInput()
+    Checkers::handleInput()
     {
         size_t fromX, fromY, toX, toY;
         
@@ -164,14 +164,14 @@ namespace SamHovhannisyan::Checkers
     }
 
     void
-    Game::changePlayer()
+    Checkers::changePlayer()
     {
         player_turn_ = !player_turn_;
         is_capture_available_ = false;
     }
 
     void
-    Game::promote(const Coordinate& coord)
+    Checkers::promote(const Coordinate& coord)
     {
         Piece& piece = getPiece(coord);
         if (piece.value == BoardElements::EMPTY) { return; }
@@ -183,20 +183,20 @@ namespace SamHovhannisyan::Checkers
         }
     }
 
-    typename Game::Piece&
-    Game::getPiece(const Coordinate& coord)
+    typename Checkers::Piece&
+    Checkers::getPiece(const Coordinate& coord)
     {
         return board_(coord);
     }
 
-    const typename Game::Piece&
-    Game::getPiece(const Coordinate& coord) const
+    const typename Checkers::Piece&
+    Checkers::getPiece(const Coordinate& coord) const
     {
         return board_(coord);
     }
 
-    std::vector<typename Game::Coordinate>
-    Game::getPieceCoordinates() const
+    std::vector<typename Checkers::Coordinate>
+    Checkers::getPieceCoordinates() const
     {
         std::vector<Coordinate> coordinates;
         for (size_t y = 0; y < board_.getRows(); ++y) {
@@ -211,7 +211,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool 
-    Game::isLegalMove(const Coordinate& from, const Coordinate& to) const
+    Checkers::isLegalMove(const Coordinate& from, const Coordinate& to) const
     {
         // Check if moving to same position
         if (from == to) { return false; }
@@ -303,7 +303,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isWin() const
+    Checkers::isWin() const
     {
         // Check if either player has no pieces left
         if (players_pieces_.first == 0 || players_pieces_.second == 0) 
@@ -319,7 +319,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isDraw() const
+    Checkers::isDraw() const
     {
         // Check for 20 moves without capture or promotion (simplified rule)
         static int movesWithoutProgress = 0;
@@ -359,7 +359,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::movePiece(const Coordinate& from, const Coordinate& to)
+    Checkers::movePiece(const Coordinate& from, const Coordinate& to)
     {
         const Piece& piece = getPiece(from);
         if (piece.value == BoardElements::EMPTY) 
@@ -375,7 +375,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::movePieceMan(const Coordinate& from, const Coordinate& to)
+    Checkers::movePieceMan(const Coordinate& from, const Coordinate& to)
     {
         Piece& piece  = getPiece(from);
         Piece& target = getPiece(to);
@@ -415,7 +415,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::movePieceKing(const Coordinate& from, const Coordinate& to)
+    Checkers::movePieceKing(const Coordinate& from, const Coordinate& to)
     {
         Piece& piece  = getPiece(from);
         Piece& target = getPiece(to);
@@ -462,7 +462,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     void
-    Game::takePiece(const Coordinate& coord)
+    Checkers::takePiece(const Coordinate& coord)
     {
         Piece& piece = getPiece(coord);
         if (piece.value == BoardElements::EMPTY) 
@@ -480,7 +480,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool 
-    Game::isOpponentsPiece(const Piece& piece) const
+    Checkers::isOpponentsPiece(const Piece& piece) const
     {
         if (piece.value == BoardElements::EMPTY) { return false; }
         return (player_turn_  && (piece.value == BoardElements::WHITE || piece.value == BoardElements::WHITE_KING)) ||
@@ -488,7 +488,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isFreePieceAround(const Coordinate& coord) const
+    Checkers::isFreePieceAround(const Coordinate& coord) const
     {
         const Piece& piece = getPiece(coord);
         if (piece.value == BoardElements::EMPTY) 
@@ -506,7 +506,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isFreePieceAroundMan(const Coordinate& coord) const
+    Checkers::isFreePieceAroundMan(const Coordinate& coord) const
     {
         // Check if current coordinate is within bounds
         if (coord.x >= board_.getCols() || coord.y >= board_.getRows()) 
@@ -556,7 +556,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isFreePieceAroundKing(const Coordinate& coord) const
+    Checkers::isFreePieceAroundKing(const Coordinate& coord) const
     {
         const Piece& piece = getPiece(coord);
         if (piece.value == BoardElements::EMPTY) { return false; }
@@ -595,7 +595,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isFreePieceAvailable(Coordinate& coord) const
+    Checkers::isFreePieceAvailable(Coordinate& coord) const
     {
         std::vector<Coordinate> coordinates = getPieceCoordinates();
         for (size_t i = 0; i < coordinates.size(); ++i) {
@@ -614,7 +614,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::hasAvailableMove(const Coordinate& coord) const
+    Checkers::hasAvailableMove(const Coordinate& coord) const
     {
         const Piece& piece = getPiece(coord);
 
