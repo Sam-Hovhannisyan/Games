@@ -59,13 +59,13 @@ namespace SamHovhannisyan::Checkers
     Game::generateDefaultBoard() 
     {
         for (size_t y = 0; y < 3; ++y) {
-            for (size_t x = (y % 2); x < 8; x += 2) {
+            for (size_t x = ((y + 1) % 2); x < board_.getCols(); x += 2) {
                 board_({x, y}).value = BoardElements::WHITE;
             }
         }
         
-        for (size_t y = 5; y < 8; ++y) {
-            for (size_t x = (y % 2); x < 8; x += 2) {
+        for (size_t y = board_.getRows() - 3; y < board_.getRows(); ++y) {
+            for (size_t x = ((y + 1) % 2); x < board_.getCols(); x += 2) {
                 board_({x, y}).value = BoardElements::BLACK;
             }
         }
