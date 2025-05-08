@@ -109,7 +109,8 @@ namespace SamHovhannisyan::MinesweeperGame
     void 
     Game::generateMines(const Coordinate& coord)
     {
-        if (coord == Coordinate(board_.getCols(), board_.getRows())) { return; }
+        if (coord == Coordinate(board_.getCols(), board_.getRows())) 
+        { return; }
         first_click_ = false;
 
         const size_t area = board_.getCols() * board_.getRows();
@@ -126,11 +127,10 @@ namespace SamHovhannisyan::MinesweeperGame
         exclude_positions.insert(coord.y * board_.getCols() + coord.x);
 
         // Add all 8 neighboring positions
-        for (int dy = -2; dy <= 2; ++dy) 
-        {
-            for (int dx = -2; dx <= 2; ++dx) 
-            {
-                if (dx == 0 && dy == 0)  { continue; }
+        for (int dy = -2; dy <= 2; ++dy) {
+            for (int dx = -2; dx <= 2; ++dx) {
+                if (dx == 0 && dy == 0)  
+                { continue; }
                 
                 int ny = coord.y + dy;
                 int nx = coord.x + dx;
@@ -193,13 +193,11 @@ namespace SamHovhannisyan::MinesweeperGame
         
         cell.second = true;
         
-        if (cell.first == BoardElements::MINE) 
-        {
+        if (cell.first == BoardElements::MINE) {
             game_over_ = true;
             revealAllMines();
         }
-        else if (cell.first == BoardElements::EMPTY) 
-        {
+        else if (cell.first == BoardElements::EMPTY) {
             openEmptysFrom(coord);
         }
     }
@@ -210,28 +208,26 @@ namespace SamHovhannisyan::MinesweeperGame
         std::queue<Coordinate> to_open;
         to_open.push(coord);
         
-        while (!to_open.empty()) 
-        {
+        while (!to_open.empty()) {
             const auto current = to_open.front();
             to_open.pop();
             
-            for (int dy = -1; dy <= 1; ++dy) 
-            {
-                for (int dx = -1; dx <= 1; ++dx) 
-                {
-                    if (dx == 0 && dy == 0) { continue; }
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    if (dx == 0 && dy == 0) 
+                    { continue; }
                     
                     const size_t nx = current.x + dx;
                     const size_t ny = current.y + dy;
                     
-                    if (nx >= board_.getCols() || ny >= board_.getRows()) { continue; }
+                    if (nx >= board_.getCols() || ny >= board_.getRows()) 
+                    { continue; }
                     
                     auto& neighbor = board_({nx, ny});
                     if (neighbor.second) { continue; }
                     
                     neighbor.second = true;
-                    if (neighbor.first == BoardElements::EMPTY) 
-                    {
+                    if (neighbor.first == BoardElements::EMPTY) {
                         to_open.push({nx, ny});
                     }
                 }
@@ -258,8 +254,7 @@ namespace SamHovhannisyan::MinesweeperGame
                 const int cellWidth = 3; 
                 
                 // Check if mouse is within board bounds
-                if (event.y >= boardStartY && event.x >= boardStartX) 
-                {
+                if (event.y >= boardStartY && event.x >= boardStartX) {
                     size_t potentialX = (event.x - boardStartX) / cellWidth;
                     size_t potentialY = event.y - boardStartY;
                 
@@ -272,8 +267,7 @@ namespace SamHovhannisyan::MinesweeperGame
                         mouseHover = true;
                         
                         if (event.bstate & BUTTON1_CLICKED) { return Coordinate(mouseX, mouseY); }
-                        else if (event.bstate & BUTTON3_CLICKED && !first_click_) 
-                        {
+                        else if (event.bstate & BUTTON3_CLICKED && !first_click_) {
                             placeRemoveFlag({mouseX, mouseY});
                         }
                     }
@@ -290,13 +284,11 @@ namespace SamHovhannisyan::MinesweeperGame
         auto& cell = board_({coord.x, coord.y});
         const auto& flag = getFlag(coord);
         if (cell.second) { return; }
-        if (!cell.second && flag == flags_.end()) 
-        {
+        if (!cell.second && flag == flags_.end()) {
             flags_.push_back(coord);
             ++flags_placed_;
         }
-        else if (flag != flags_.end()) 
-        {
+        else if (flag != flags_.end()) {
             flags_.erase(flag);
             --flags_placed_;
         }
@@ -319,8 +311,7 @@ namespace SamHovhannisyan::MinesweeperGame
             // Check for quit
             if (coord == Coordinate(board_.getCols(), board_.getRows())) { continue; }
             
-            if (first_click_) 
-            {
+            if (first_click_) {
                 generateMines(coord);
                 openCell(coord);  // Open the first clicked cell
                 first_click_ = false;
@@ -346,12 +337,11 @@ namespace SamHovhannisyan::MinesweeperGame
     bool 
     Game::checkWin() const
     {
-        for (size_t y = 0; y < board_.getRows(); ++y) 
-        {
-            for (size_t x = 0; x < board_.getCols(); ++x) 
-            {
+        for (size_t y = 0; y < board_.getRows(); ++y) {
+            for (size_t x = 0; x < board_.getCols(); ++x) {
                 const auto& cell = board_({x, y});
-                if (cell.first != MINE && !cell.second) { return false; }
+                if (cell.first != MINE && !cell.second) 
+                { return false; }
             }
         }
         
@@ -361,12 +351,9 @@ namespace SamHovhannisyan::MinesweeperGame
     void 
     Game::revealAllMines() 
     {
-        for (size_t y = 0; y < board_.getRows(); ++y) 
-        {
-            for (size_t x = 0; x < board_.getCols(); ++x) 
-            {
-                if (board_({x, y}).first == BoardElements::MINE) 
-                {
+        for (size_t y = 0; y < board_.getRows(); ++y) {
+            for (size_t x = 0; x < board_.getCols(); ++x) {
+                if (board_({x, y}).first == BoardElements::MINE) {
                     board_({x, y}).second = true;
                 }
             }

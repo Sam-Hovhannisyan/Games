@@ -6,9 +6,7 @@
 #include <algorithm>
 #include <random>
 
-namespace SamHovhannisyan
-{
-namespace MinesweeperGame
+namespace SamHovhannisyan::MinesweeperGame
 {
     class Game
     {
@@ -56,6 +54,5 @@ namespace MinesweeperGame
         size_t flags_placed_;
     };
 }    
-}
 
 #endif // __GAME_HPP__
