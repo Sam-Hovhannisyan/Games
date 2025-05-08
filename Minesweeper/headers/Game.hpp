@@ -1,5 +1,5 @@
-#ifndef __GAME_HPP__
-#define __GAME_HPP__
+#ifndef __MINESWEEPER_HPP__
+#define __MINESWEEPER_HPP__
 
 #include "../resources/headers/Board.hpp"
 
@@ -55,4 +55,4 @@ namespace SamHovhannisyan::MinesweeperGame
     };
 }    
 
-#endif // __GAME_HPP__
+#endif
