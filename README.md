@@ -3,9 +3,9 @@
 ### Games Created in the Project
 This project includes a collection of games implemented in C/C++. Each game is designed to run in a terminal environment and utilizes the `ncurses` library for rendering the user interface. The games are:
 
-1. **Game 1**: [Snake](https://en.wikipedia.org/wiki/Snake_(video_game_genre)) - A classic game where the player controls a snake to collect food while avoiding collisions with the walls and itself.
-2. **Game 2**: [Minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)) - A puzzle game where the player uncovers tiles on a grid, avoiding hidden mines while using numerical clues to locate them.
-3. **Game 3**: [Checkers](https://en.wikipedia.org/wiki/Draughts) - A strategy board game where players move pieces diagonally to capture the opponent's pieces and aim to dominate the board.
+1. **[Snake](https://en.wikipedia.org/wiki/Snake_(video_game_genre))** - A classic game where the player controls a snake to collect food while avoiding collisions with the walls and itself.
+2. **[Minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game))** - A puzzle game where the player uncovers tiles on a grid, avoiding hidden mines while using numerical clues to locate them.
+3. **[Checkers](https://en.wikipedia.org/wiki/Draughts)** - A strategy board game where players move pieces diagonally to capture the opponent's pieces and aim to dominate the board.
 
 ### Running the Project on Linux
 To ensure the project works correctly on a Linux system, follow these steps:
