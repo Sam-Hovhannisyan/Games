@@ -40,7 +40,6 @@ namespace SamHovhannisyan::SnakeGame
         void placeFruit();
         void eatFruit();
         void changeDirection(Direction newDirection);
-        // void updateScore();
         void checkCollision();
         void initializeColors();
         void handleInput();
@@ -57,6 +56,5 @@ namespace SamHovhannisyan::SnakeGame
         bool game_over_;
     };
 }    
-
 
 #endif // __SNAKE_HPP__

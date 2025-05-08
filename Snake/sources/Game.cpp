@@ -1,9 +1,7 @@
 #include "headers/Game.hpp"
 #include <algorithm>
 
-namespace SamHovhannisyan 
-{
-namespace SnakeGame 
+namespace SamHovhannisyan::SnakeGame 
 {
     Game::Game(const size_t width, const size_t height) 
         : board_(width, height)
@@ -212,5 +210,4 @@ namespace SnakeGame
         refresh();
         getch();
     }
-}
 }
