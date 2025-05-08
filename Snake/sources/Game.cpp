@@ -3,7 +3,7 @@
 
 namespace SamHovhannisyan::SnakeGame 
 {
-    Game::Game(const size_t width, const size_t height) 
+    Snake::Snake(const size_t width, const size_t height) 
         : board_(width, height)
         , direction_(RIGHT)
         , level_(1)
@@ -18,7 +18,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void 
-    Game::start() 
+    Snake::start() 
     {
         initscr();
         noecho();
@@ -41,7 +41,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void 
-    Game::drawBoard() const
+    Snake::drawBoard() const
     {
         clear();
         
@@ -88,7 +88,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void 
-    Game::moveSnake() 
+    Snake::moveSnake() 
     {
         Coordinate::Coordinate newHead = snakeHead_;
         switch (direction_) 
@@ -109,7 +109,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void
-    Game::changeDirection(Direction newDirection) 
+    Snake::changeDirection(Direction newDirection) 
     {
         if ((direction_ == UP    && newDirection != DOWN ) ||
             (direction_ == DOWN  && newDirection != UP   ) ||
@@ -121,7 +121,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void
-    Game::checkCollision()
+    Snake::checkCollision()
     {
         if (snakeHead_.x >= board_.getCols() ||
             snakeHead_.y >= board_.getRows()) 
@@ -139,7 +139,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void 
-    Game::initializeColors()
+    Snake::initializeColors()
     {
         start_color();
         init_pair(1, COLOR_GREEN, COLOR_BLACK);  // Snake
@@ -148,7 +148,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void 
-    Game::handleInput() 
+    Snake::handleInput() 
     {
         int ch = getch();
         switch (ch) 
@@ -161,7 +161,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void 
-    Game::placeFruit()
+    Snake::placeFruit()
     {
         std::vector<Coordinate::Coordinate> emptySpots;
     
@@ -192,7 +192,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void
-    Game::eatFruit()
+    Snake::eatFruit()
     {
         placeFruit();
         
@@ -203,7 +203,7 @@ namespace SamHovhannisyan::SnakeGame
     }
 
     void
-    Game::renderGameOver() const
+    Snake::renderGameOver() const
     {
         clear();
         mvprintw(0, 2, "Game Over. Your score: %zu", snakeBody_.size() - 1);

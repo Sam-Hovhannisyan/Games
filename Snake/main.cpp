@@ -3,7 +3,8 @@
 int
 main()
 {
-    SamHovhannisyan::SnakeGame::Game game(20, 20);
+    SamHovhannisyan::SnakeGame::Snake game(20, 20);
     game.start();
+    
     return 0;
 }

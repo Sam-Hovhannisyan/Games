@@ -11,10 +11,10 @@
 
 namespace SamHovhannisyan::SnakeGame
 {
-    class Game
+    class Snake
     {
     public:
-        Game(const size_t width = 20, const size_t height = 20);
+        Snake(const size_t width = 20, const size_t height = 20);
         void start();
     
     private:
