@@ -11,7 +11,7 @@ namespace SamHovhannisyan::Checkers
         , player_turn_(true)
         , is_capture_available_(false)
         , board_(8, 8)
-        , players_pieces_({2, 1})
+        , players_pieces_({12, 12})
     {}
 
     void
@@ -58,17 +58,6 @@ namespace SamHovhannisyan::Checkers
     void
     Game::generateDefaultBoard() 
     {
-        
-        for (size_t i = 0; i < 2; i += 2) {
-            board_({i, 2}).value = BoardElements::WHITE_KING;
-        }
-
-        for (size_t i = 1; i < 4; i += 2) {
-            board_({i, 5}).value = BoardElements::BLACK;
-        }
-        board_({1, 5}).value = BoardElements::BLACK_KING;
-        /*
-        
         for (size_t y = 0; y < 3; ++y) {
             for (size_t x = (y % 2); x < 8; x += 2) {
                 board_({x, y}).value = BoardElements::WHITE;
@@ -80,7 +69,6 @@ namespace SamHovhannisyan::Checkers
                 board_({x, y}).value = BoardElements::BLACK;
             }
         }
-        */
     }
 
     void
@@ -301,9 +289,8 @@ namespace SamHovhannisyan::Checkers
 
                 const Piece& current = getPiece({fromX, fromY}); 
                 if ((!player_turn_ && (current.value == BoardElements::WHITE || current.value == BoardElements::WHITE_KING)) ||
-                    (player_turn_  && (current.value == BoardElements::BLACK || current.value == BoardElements::BLACK_KING))) {
-                    return false;
-                }
+                    (player_turn_  && (current.value == BoardElements::BLACK || current.value == BoardElements::BLACK_KING))) 
+                { return false; }
 
                 if (isOpponentsPiece(current)) {
                     ++opponentPieceCount;
@@ -319,48 +306,16 @@ namespace SamHovhannisyan::Checkers
     Game::isWin() const
     {
         // Check if either player has no pieces left
-        if (players_pieces_.first == 0 || players_pieces_.second == 0) {
-            return true;
+        if (players_pieces_.first == 0 || players_pieces_.second == 0) 
+        { return true; }
+
+        auto pieces = getPieceCoordinates();
+        for (const auto& piece : pieces) {
+            if (hasAvailableMove(piece)) 
+            { return false; }
         }
 
-        // Check if current player has no valid moves left
-        bool hasValidMoves = false;
-        for (size_t y = 0; y < board_.getRows(); ++y) {
-            for (size_t x = 0; x < board_.getCols(); ++x) {
-                const Piece& piece = getPiece({x, y});
-                
-                // Skip empty squares and opponent's pieces
-                if (piece.value == BoardElements::EMPTY || 
-                    (player_turn_  && ((piece.value & BoardElements::WHITE) == BoardElements::WHITE)) ||
-                    (!player_turn_ && ((piece.value & BoardElements::BLACK) == BoardElements::BLACK))) 
-                { continue; }
-
-                // Check all possible moves for this piece
-                for (int dy = -2; dy <= 2; ++dy) {
-                    for (int dx = -2; dx <= 2; ++dx) {
-                        if (dx == 0 || dy == 0) continue; // Skip non-diagonal moves
-                        
-                        size_t newX = x + dx;
-                        size_t newY = y + dy;
-                        
-                        if (newX >= board_.getCols() || newY >= board_.getRows()) continue;
-                        
-                        Coordinate from{x, y};
-                        Coordinate to{newX, newY};
-                        
-                        if (isLegalMove(from, to)) {
-                            hasValidMoves = true;
-                            break;
-                        }
-                    }
-                    if (hasValidMoves) break;
-                }
-                if (hasValidMoves) break;
-            }
-            if (hasValidMoves) break;
-        }
-
-        return !hasValidMoves;
+        return true;
     }
 
     bool
@@ -397,9 +352,8 @@ namespace SamHovhannisyan::Checkers
             if (!onlyKingsLeft) break;
         }
         
-        if (onlyKingsLeft && players_pieces_.first == 1 && players_pieces_.second == 1) {
-            return true; // Only two kings left - automatic draw
-        }
+        if (onlyKingsLeft && players_pieces_.first == 1 && players_pieces_.second == 1) 
+        { return true; }// Only two kings left - automatic draw
         
         return false;
     }
@@ -408,15 +362,14 @@ namespace SamHovhannisyan::Checkers
     Game::movePiece(const Coordinate& from, const Coordinate& to)
     {
         const Piece& piece = getPiece(from);
-        if (piece.value == BoardElements::EMPTY) { return false; }
+        if (piece.value == BoardElements::EMPTY) 
+        { return false; }
 
-        if (piece.value == BoardElements::BLACK || piece.value == BoardElements::WHITE) {
-            return movePieceMan(from, to);
-        }
+        if (piece.value == BoardElements::BLACK || piece.value == BoardElements::WHITE) 
+        { return movePieceMan(from, to); }
 
-        if (piece.value == BoardElements::BLACK_KING || piece.value == BoardElements::WHITE_KING) {
-            return movePieceKing(from, to);
-        }
+        if (piece.value == BoardElements::BLACK_KING || piece.value == BoardElements::WHITE_KING) 
+        { return movePieceKing(from, to); }
 
         return false;
     }
@@ -512,7 +465,8 @@ namespace SamHovhannisyan::Checkers
     Game::takePiece(const Coordinate& coord)
     {
         Piece& piece = getPiece(coord);
-        if (piece.value == BoardElements::EMPTY) { return; }
+        if (piece.value == BoardElements::EMPTY) 
+        { return; }
         
         // Update player pieces count
         if ((piece.value & BoardElements::WHITE) == BoardElements::WHITE) {
@@ -526,7 +480,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool 
-    Game::isOpponentsPiece(const typename Game::Piece& piece) const
+    Game::isOpponentsPiece(const Piece& piece) const
     {
         if (piece.value == BoardElements::EMPTY) { return false; }
         return (player_turn_  && (piece.value == BoardElements::WHITE || piece.value == BoardElements::WHITE_KING)) ||
@@ -537,15 +491,16 @@ namespace SamHovhannisyan::Checkers
     Game::isFreePieceAround(const Coordinate& coord) const
     {
         const Piece& piece = getPiece(coord);
-        if (piece.value == BoardElements::EMPTY) { return false; }
+        if (piece.value == BoardElements::EMPTY) 
+        { return false; }
 
-        if (piece.value == BoardElements::BLACK || piece.value == BoardElements::WHITE) {
-            return isFreePieceAroundMan(coord);
-        }
+        if (piece.value == BoardElements::BLACK || 
+            piece.value == BoardElements::WHITE) 
+        { return isFreePieceAroundMan(coord); }
 
-        if (piece.value == BoardElements::BLACK_KING || piece.value == BoardElements::WHITE_KING) {
-            return isFreePieceAroundKing(coord);
-        }
+        if (piece.value == BoardElements::BLACK_KING || 
+            piece.value == BoardElements::WHITE_KING) 
+        { return isFreePieceAroundKing(coord); }
 
         return false;
     }
@@ -554,12 +509,12 @@ namespace SamHovhannisyan::Checkers
     Game::isFreePieceAroundMan(const Coordinate& coord) const
     {
         // Check if current coordinate is within bounds
-        if (coord.x >= board_.getCols() || coord.y >= board_.getRows()) {
-            return false;
-        }
+        if (coord.x >= board_.getCols() || coord.y >= board_.getRows()) 
+        { return false; }
 
         const Piece& piece = getPiece(coord);
-        if (piece.value == BoardElements::EMPTY) { return false; }
+        if (piece.value == BoardElements::EMPTY) 
+        { return false; }
 
         if (piece.value == BoardElements::WHITE) {
             // Check right diagonal
@@ -640,7 +595,7 @@ namespace SamHovhannisyan::Checkers
     }
 
     bool
-    Game::isFreePieceAvailable(typename Game::Coordinate& coord) const
+    Game::isFreePieceAvailable(Coordinate& coord) const
     {
         std::vector<Coordinate> coordinates = getPieceCoordinates();
         for (size_t i = 0; i < coordinates.size(); ++i) {
@@ -658,4 +613,52 @@ namespace SamHovhannisyan::Checkers
         return false;
     }
 
+    bool
+    Game::hasAvailableMove(const Coordinate& coord) const
+    {
+        const Piece& piece = getPiece(coord);
+
+        const std::vector<std::pair<int, int>> directions = {
+            {1, 1},   // Down-right
+            {1, -1},  // Up-right
+            {-1, 1},  // Down-left
+            {-1, -1}  // Up-left
+        };
+
+        switch (piece.value) 
+        {
+            case BoardElements::EMPTY: return false;
+
+            case BoardElements::BLACK:
+            case BoardElements::WHITE:
+            {
+                Coordinate newCoord(coord.x, coord.y + (piece.value == BoardElements::BLACK ? -1 : 1)); 
+                // Check forward moves
+                if (newCoord.y < board_.getRows()) {
+                    if (newCoord.x + 1 < board_.getCols() && 
+                        getPiece({newCoord.x + 1, newCoord.y}).value == BoardElements::EMPTY) 
+                    { return true; }
+                    // Check left diagonal
+                    if (newCoord.x > 0 && 
+                        getPiece({newCoord.x - 1, newCoord.y}).value == BoardElements::EMPTY) 
+                    { return true; }
+                }
+                break;
+            }
+            
+            case BoardElements::BLACK_KING:
+            case BoardElements::WHITE_KING:
+            {
+                for (const auto& direction : directions) {
+                    if (coord.x + direction.first >= board_.getCols() || coord.y + direction.second >= board_.getRows()) 
+                    { continue; }
+                    if (getPiece({coord.x + direction.first, coord.y + direction.second}).value == BoardElements::EMPTY)
+                    { return true; }
+                }
+                break;
+            }
+        }
+
+        return false;
+    }
 }

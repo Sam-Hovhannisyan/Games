@@ -5,7 +5,6 @@
 #include "../resources/headers/Piece.hpp"
 
 #include <iostream>
-#include <vector>
 
 namespace SamHovhannisyan::Checkers
 {
@@ -42,12 +41,13 @@ namespace SamHovhannisyan::Checkers
         Piece& getPiece(const Coordinate& coord);
         const Piece& getPiece(const Coordinate& coord) const;
         std::vector<Coordinate> getPieceCoordinates() const;
-        bool isOpponentsPiece(const typename Game::Piece& piece) const;
-        bool isFreePieceAvailable(typename Game::Coordinate& coord) const;
+        bool isOpponentsPiece(const Piece& piece) const;
+        bool isFreePieceAvailable(Coordinate& coord) const;
         bool isFreePieceAround(const Coordinate& coord) const;
         bool isFreePieceAroundMan(const Coordinate& coord) const;
         bool isFreePieceAroundKing(const Coordinate& coord) const;
         bool isLegalMove(const Coordinate& from, const Coordinate& to) const;
+        bool hasAvailableMove(const Coordinate& coord) const;
         bool isWin() const;
         bool isDraw() const;
 
