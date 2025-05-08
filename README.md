@@ -19,16 +19,15 @@ To ensure the project works correctly on a Linux system, follow these steps:
      ```
 
 2. **Compile the Project**:
-   - Use a C/C++ compiler such as `gcc` or `g++` to compile the source code.
-   - Ensure you link the `ncurses` library during compilation. For example:
-     ```bash
-     gcc -o game game.c -lncurses
+   - Use a C/C++ compiler such as `gcc` or `g++` to compile the source code (use command `make`):
+    ```bash
+     make
      ```
 
 3. **Run the Games**:
    - After successful compilation, you can run the games by executing the compiled binary:
      ```bash
-     ./game
+     ./builds/debug/name_game
      ```
 
 ### Troubleshooting
