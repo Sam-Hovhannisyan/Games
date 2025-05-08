@@ -12,7 +12,7 @@ namespace SamHovhannisyan::MinesweeperGame
     size_t mouseY = 0;
     bool mouseHover = false;
 
-    Game::Game(const size_t width, const size_t height)
+    Minesweeper::Minesweeper(const size_t width, const size_t height)
         : board_(width, height)
         , first_click_(true)
         , game_over_(false)
@@ -39,7 +39,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::drawBoard() const
+    Minesweeper::drawBoard() const
     {
         clear();
         
@@ -107,7 +107,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
     
     void 
-    Game::generateMines(const Coordinate& coord)
+    Minesweeper::generateMines(const Coordinate& coord)
     {
         if (coord == Coordinate(board_.getCols(), board_.getRows())) 
         { return; }
@@ -158,7 +158,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::placeBomb(const size_t pos)
+    Minesweeper::placeBomb(const size_t pos)
     {
         const size_t x = pos % board_.getCols();
         const size_t y = pos / board_.getCols();
@@ -186,7 +186,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::openCell(const Coordinate& coord)
+    Minesweeper::openCell(const Coordinate& coord)
     {
         auto& cell = board_(coord);
         if (getFlag(coord) != flags_.end()) { return; }
@@ -203,7 +203,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::openEmptysFrom(const Coordinate& coord)
+    Minesweeper::openEmptysFrom(const Coordinate& coord)
     {
         std::queue<Coordinate> to_open;
         to_open.push(coord);
@@ -235,8 +235,8 @@ namespace SamHovhannisyan::MinesweeperGame
         }
     }
 
-    const typename Game::Coordinate
-    Game::handleInput()
+    const typename Minesweeper::Coordinate
+    Minesweeper::handleInput()
     {
         MEVENT event;
         int ch = getch();
@@ -279,7 +279,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void
-    Game::placeRemoveFlag(const Coordinate& coord)
+    Minesweeper::placeRemoveFlag(const Coordinate& coord)
     {
         auto& cell = board_({coord.x, coord.y});
         const auto& flag = getFlag(coord);
@@ -294,14 +294,14 @@ namespace SamHovhannisyan::MinesweeperGame
         }
     }
 
-    std::vector<SamHovhannisyan::MinesweeperGame::Game::Coordinate>::const_iterator
-    Game::getFlag(const Coordinate& coord) const
+    std::vector<SamHovhannisyan::MinesweeperGame::Minesweeper::Coordinate>::const_iterator
+    Minesweeper::getFlag(const Coordinate& coord) const
     {
         return std::find(flags_.begin(), flags_.end(), coord);
     }
 
     void 
-    Game::start()
+    Minesweeper::start()
     {
         while (!game_over_) 
         {
@@ -335,7 +335,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
     
     bool 
-    Game::checkWin() const
+    Minesweeper::checkWin() const
     {
         for (size_t y = 0; y < board_.getRows(); ++y) {
             for (size_t x = 0; x < board_.getCols(); ++x) {
@@ -349,7 +349,7 @@ namespace SamHovhannisyan::MinesweeperGame
     }
 
     void 
-    Game::revealAllMines() 
+    Minesweeper::revealAllMines() 
     {
         for (size_t y = 0; y < board_.getRows(); ++y) {
             for (size_t x = 0; x < board_.getCols(); ++x) {

@@ -3,7 +3,7 @@
 int 
 main()
 {
-    SamHovhannisyan::MinesweeperGame::Game game;
+    SamHovhannisyan::MinesweeperGame::Minesweeper game;
     game.start();
 
     return 0;

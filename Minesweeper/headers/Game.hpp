@@ -8,12 +8,12 @@
 
 namespace SamHovhannisyan::MinesweeperGame
 {
-    class Game
+    class Minesweeper
     {
     public:
         typedef Coordinate::Coordinate Coordinate;
     public:
-        Game(const size_t width = 16, const size_t height = 16);
+        Minesweeper(const size_t width = 16, const size_t height = 16);
         void start();
     
     private:
@@ -37,7 +37,7 @@ namespace SamHovhannisyan::MinesweeperGame
         void generateMines(const Coordinate& coord);
         void placeBomb(const size_t pos);
         void placeRemoveFlag(const Coordinate& coord);
-        std::vector<SamHovhannisyan::MinesweeperGame::Game::Coordinate>::const_iterator getFlag(const Coordinate& coord) const;
+        std::vector<SamHovhannisyan::MinesweeperGame::Minesweeper::Coordinate>::const_iterator getFlag(const Coordinate& coord) const;
         const Coordinate handleInput();
         void checkCollision();
         bool checkWin() const;
