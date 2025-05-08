@@ -4,9 +4,7 @@
 #include "../resources/headers/Coordinate.hpp"
 #include <iostream>
 
-namespace SamHovhannisyan
-{
-namespace Fruit
+namespace SamHovhannisyan::Fruit
 {
     struct Fruit
     {
@@ -23,6 +21,5 @@ namespace Fruit
 
     inline size_t Fruit::FRUIT_COUNT = 0;
 }    
-}
 
 #endif // __FRUIT_HPP__

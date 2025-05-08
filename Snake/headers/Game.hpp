@@ -1,5 +1,5 @@
-#ifndef __GAME_HPP__
-#define __GAME_HPP__
+#ifndef __SNAKE_HPP__
+#define __SNAKE_HPP__
 
 #include "../resources/headers/Board.hpp"
 #include "../headers/Fruit.hpp"
@@ -9,9 +9,7 @@
 #include <ctime>
 #include <cstdlib>
 
-namespace SamHovhannisyan
-{
-namespace SnakeGame
+namespace SamHovhannisyan::SnakeGame
 {
     class Game
     {
@@ -58,8 +56,7 @@ namespace SnakeGame
         size_t speed_;
         bool game_over_;
     };
-}
 }    
 
 
-#endif // __GAME_HPP__
+#endif // __SNAKE_HPP__
