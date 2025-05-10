@@ -9,7 +9,6 @@ namespace SamHovhannisyan::CheckersGame
     Checkers::Checkers()
         : game_over_(false)
         , player_turn_(true)
-        , is_capture_available_(false)
         , board_(8, 8)
         , players_pieces_({12, 12})
     {}
@@ -61,12 +60,22 @@ namespace SamHovhannisyan::CheckersGame
         for (size_t y = 0; y < 3; ++y) {
             for (size_t x = ((y + 1) % 2); x < board_.getCols(); x += 2) {
                 board_({x, y}).value = BoardElements::WHITE;
+                board_({x, y}).hasMoved = false; // Reset hasMoved
             }
         }
         
         for (size_t y = board_.getRows() - 3; y < board_.getRows(); ++y) {
             for (size_t x = ((y + 1) % 2); x < board_.getCols(); x += 2) {
                 board_({x, y}).value = BoardElements::BLACK;
+                board_({x, y}).hasMoved = false; // Reset hasMoved
+            }
+        }
+
+        // Reset all other cells to empty
+        for (size_t y = 3; y < board_.getRows() - 3; ++y) {
+            for (size_t x = 0; x < board_.getCols(); ++x) {
+                board_({x, y}).value = BoardElements::EMPTY;
+                board_({x, y}).hasMoved = false; // Reset hasMoved
             }
         }
     }
@@ -167,7 +176,6 @@ namespace SamHovhannisyan::CheckersGame
     Checkers::changePlayer()
     {
         player_turn_ = !player_turn_;
-        is_capture_available_ = false;
     }
 
     void
@@ -386,7 +394,7 @@ namespace SamHovhannisyan::CheckersGame
         const int absDx = abs(dx);
 
         if (absDx == 1) {
-            if (is_capture_available_) { return true; }
+            if (piece.hasMoved) { return true; }
             Coordinate coord;
             if (isFreePieceAvailable(coord)) {
                 takePiece(coord);
@@ -401,7 +409,7 @@ namespace SamHovhannisyan::CheckersGame
             const size_t capturedX = from.x + dx / 2;
             const size_t capturedY = from.y + dy / 2;
             target = piece;
-            is_capture_available_ = isFreePieceAround(to);
+            piece.hasMoved = true;
             target.value = BoardElements::EMPTY;
             takePiece({capturedX, capturedY});
         }
@@ -411,7 +419,11 @@ namespace SamHovhannisyan::CheckersGame
         piece.value = BoardElements::EMPTY;
         
         promote(to);
-        return is_capture_available_;
+        if (piece.hasMoved && isFreePieceAround(to)) {
+            piece.hasMoved = false;
+            return true;
+        }
+        return false;
     }
 
     bool
@@ -441,7 +453,7 @@ namespace SamHovhannisyan::CheckersGame
             if (isOpponentsPiece(current)) {
                 takePiece({fromX, fromY});
                 target = piece;
-                is_capture_available_ = isFreePieceAround(to);
+                piece.hasMoved = isFreePieceAround(to);
                 target.value = BoardElements::EMPTY;
                 break;
             }
@@ -457,8 +469,11 @@ namespace SamHovhannisyan::CheckersGame
         
         target = piece;
         piece.value = BoardElements::EMPTY;
-
-        return is_capture_available_;
+        if (piece.hasMoved) {
+            piece.hasMoved = false;
+            return true;
+        }
+        return false;
     }
 
     void

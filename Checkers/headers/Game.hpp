@@ -54,7 +54,7 @@ namespace SamHovhannisyan::CheckersGame
     private:
         bool game_over_;
         bool player_turn_;
-        bool is_capture_available_;
+        // bool is_capture_available_;
         Board::Board<Piece> board_;
         std::pair<int, int> players_pieces_;
     };
